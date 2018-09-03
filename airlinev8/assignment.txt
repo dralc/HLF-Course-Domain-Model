@@ -1,0 +1,31 @@
+Exercise: Define the Aircraft Assignment Transaction
+Section 11, Lecture 81
+
+Aircraft resource is assigned to the flights by the Logistics department. This assignment is carried out as a separate exercise. Logistics on which aircraft is available and where it is available is managed off-chain as this information (data) is not of interest to participants other than Logistics.
+
+
+Start by creating a new model project airlinev81 by copying the content from airlinev8
+
+Steps to follow 
+
+============
+
+    Add the following Transaction to the model file
+        org.acme.airline.flight.AssignAircraft
+        Parameters: {o String flightId                      o String aircraftId}
+    Add the event
+        org.acme.airline.flight.AircraftAssigned
+        Parameters: {o String flightId                      o String aircraftId}
+    Code the Transaction Processor function AssignAircraft
+        Check if flight and aircraft exist - if not throw an exception
+        Use factory to create an aircraft relationship
+        Assign aircraft relationship to flight
+        Use registry to update the flight
+    Code the unit test case 
+        In before() add some test data 
+        Create the test case file (Solution is in aircraft-assignment.js) .... refer to the schedule-validation.js for help :)
+        Write the test cases for:
+            Sunny day scenario
+            FlightID does not exist
+
+Solution:    Acme Airline v9
