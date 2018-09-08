@@ -88,15 +88,34 @@ function generateFlightId(flightNum, schedule){
 
 /**
  * Assigns an Aircraft to a Flight
+ * - Throws error if flight or aircraft are non-existent
+ * - Update the flight with a flight->aircraft relationship
  *
  * @param {org.acme.airline.flight.AssignAircraft} txData
  * @transaction
- *
  */
 async function AssignAircraft(txData){
+    const NS_FLIGHT = 'org.acme.airline.flight';
+    const NS_AIRCRAFT = 'org.acme.airline.aircraft';
+
     try {
-        let flightRegistry = await getAssetRegistry('org.acme.airline.flight.Flight')
+        let flightRegistry = await getAssetRegistry(`${NS_FLIGHT}.Flight`);
         let flight = await flightRegistry.get(txData.flightId);
+
+        // Relate the aircraft to the flight
+        const factory = getFactory();
+        let aircraftRel = factory.newRelationship(NS_AIRCRAFT, 'Aircraft', txData.aircraftId);
+        flight.aircraft = aircraftRel;
+
+        await flightRegistry.update(flight);
+
+        const ev = factory.newEvent(NS_FLIGHT, 'AircraftAssigned');
+        ev.flightId = txData.flightId;
+        ev.aircraftId = txData.aircraftId;
+        emit(ev);
+
+        // TODO check aircraft existence
+
 
     } catch (error) {
         throw error;
