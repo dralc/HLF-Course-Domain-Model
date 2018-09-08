@@ -99,26 +99,26 @@ async function AssignAircraft(txData){
     const NS_AIRCRAFT = 'org.acme.airline.aircraft';
 
     try {
+        // 1. Check existence of Aircraft and Flight
         let flightRegistry = await getAssetRegistry(`${NS_FLIGHT}.Flight`);
         let flight = await flightRegistry.get(txData.flightId);
+        let aircraftRegistry = await getAssetRegistry(`${NS_AIRCRAFT}.Aircraft`);
+        await aircraftRegistry.get(txData.aircraftId); // Var not needed
 
-        // Relate the aircraft to the flight
+        // 2. Relate the aircraft to the flight
         const factory = getFactory();
         let aircraftRel = factory.newRelationship(NS_AIRCRAFT, 'Aircraft', txData.aircraftId);
         flight.aircraft = aircraftRel;
 
         await flightRegistry.update(flight);
 
+        // 3. Emit event
         const ev = factory.newEvent(NS_FLIGHT, 'AircraftAssigned');
         ev.flightId = txData.flightId;
         ev.aircraftId = txData.aircraftId;
         emit(ev);
 
-        // TODO check aircraft existence
-
-
     } catch (error) {
         throw error;
-
     }
 }

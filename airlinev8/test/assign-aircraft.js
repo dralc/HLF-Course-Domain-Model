@@ -137,8 +137,9 @@ describe('Assign an Aircraft to a Flight', function () {
         })();
     });
 
-    it('should NOT assign an invalid Aircraft to a flight', async function () {
+    it('should NOT assign an INvalid Aircraft to a Flight', async function () {
         try {
+            // 1. Submit a Tx for an INvalid Aircraft
             let tx = factory.newTransaction(DAT.NS_FLIGHT, 'AssignAircraft');
             tx.flightId = flightId;
             tx.aircraftId = DAT.INVALID_AIRCRAFT_ID;
@@ -146,8 +147,7 @@ describe('Assign an Aircraft to a Flight', function () {
             await bnConnection.submitTransaction(tx);
             throw Error('Execution should NOT have reached here');
         } catch (error) {
-            assert.equal(error.message, `Object with ID '${DAT.INVALID_AIRCRAFT_ID}' in collection with ID 'Asset:org.acme.airline.flight.Aircraft' does not exist`);
+            assert.equal(error.message, `Object with ID '${DAT.INVALID_AIRCRAFT_ID}' in collection with ID 'Asset:org.acme.airline.aircraft.Aircraft' does not exist`);
         }
     });
-
 });
