@@ -52,17 +52,15 @@ describe('Assign an Aircraft to a Flight', function () {
      * It reduces boilerplate code when writing the listeners specific events
      *
      * @param {*} eventName
-     * @param {Function} done Called after {fn} is finished to end the test
-     * @param {Function} fn An async callback
+     * @param {Function} fn A callback
      *
      * @return {Function}
      */
-    function listener(eventName, done, fn) {
-        return async (ev) => {
+    function listener(eventName, fn) {
+        return (ev) => {
             switch (ev.$type) {
             case eventName:
-                await fn(ev);
-                done();
+                fn(ev);
                 break;
             default:
                 break;
@@ -80,7 +78,7 @@ describe('Assign an Aircraft to a Flight', function () {
             tx.schedule = new Date('2029-01-15T01:01:01.001Z');
 
             // - Subscribe to 'events': FlightCreated to get the flightId
-            bnConnection.on('event', listener('FlightCreated', done, async (ev) => {
+            bnConnection.on('event', listener('FlightCreated', async (ev) => {
                 try {
                     let aircraft;
                     flightId = ev.flightId;
@@ -94,6 +92,7 @@ describe('Assign an Aircraft to a Flight', function () {
                     aircraft.economyClassSeats = 30;
 
                     await aircraftRegistry.add(aircraft);
+                    done();
                 } catch (error) {
                     console.error(error.stack);
                 }
@@ -124,9 +123,10 @@ describe('Assign an Aircraft to a Flight', function () {
                 tx.flightId = flightId;
                 tx.aircraftId = DAT.AIRCRAFT_ID;
 
-                bnConnection.on('event', listener('AircraftAssigned', done, async (ev) => {
+                bnConnection.on('event', listener('AircraftAssigned', async (ev) => {
                     flight = await flightRegistry.get(flightId);
                     assert.equal(flight.aircraft.$identifier, DAT.AIRCRAFT_ID, `An incorrect aircraft id was assigned to the flight id ${flightId}`);
+                    done();
                 }));
 
                 await bnConnection.submitTransaction(tx);
@@ -137,7 +137,7 @@ describe('Assign an Aircraft to a Flight', function () {
         })();
     });
 
-    it.skip('should NOT assign an invalid Aircraft to a flight', async function () {
+    it('should NOT assign an invalid Aircraft to a flight', async function () {
         try {
             let tx = factory.newTransaction(DAT.NS_FLIGHT, 'AssignAircraft');
             tx.flightId = flightId;
